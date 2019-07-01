@@ -1,0 +1,103 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
+
+    defaultConfig {
+        applicationId "ru.playsoftware.j2meloader"
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode 67
+        versionName "1.5.0"
+        setProperty("archivesBaseName", "J2ME_Loader-$versionName")
+        ndk {
+            abiFilters 'x86', 'armeabi-v7a'
+        }
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+    flavorDimensions "default"
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    lintOptions {
+        abortOnError false
+        disable 'MissingTranslation'
+    }
+
+    productFlavors {
+        play {
+            buildConfigField "boolean", "DONATIONS_GOOGLE", "true"
+            versionNameSuffix "-play"
+        }
+        open {
+            buildConfigField "boolean", "DONATIONS_GOOGLE", "false"
+            versionNameSuffix "-open"
+        }
+        fdroid {
+            buildConfigField "boolean", "DONATIONS_GOOGLE", "false"
+        }
+        dev {
+            buildConfigField "boolean", "DONATIONS_GOOGLE", "false"
+            versionNameSuffix "-dev-" + generateVersionCode()
+        }
+    }
+
+    bundle {
+        language {
+            enableSplit = false
+        }
+        density {
+            enableSplit = false
+        }
+        abi {
+            enableSplit = true
+        }
+    }
+
+    externalNativeBuild {
+        ndkBuild {
+            path 'src/main/cpp/Android.mk'
+        }
+    }
+}
+
+static def generateVersionCode() {
+    def result = "git rev-list HEAD --count".execute().text.trim()
+    print("the git version is : " + result)
+    return result.toInteger()
+}
+
+dependencies {
+    def roomVersion = '2.0.0'
+    implementation "androidx.room:room-runtime:$roomVersion"
+    implementation "androidx.room:room-rxjava2:$roomVersion"
+    annotationProcessor "androidx.room:room-compiler:$roomVersion"
+    implementation 'androidx.appcompat:appcompat:1.0.2'
+    implementation 'com.google.android.material:material:1.0.0'
+    implementation 'androidx.preference:preference:1.0.0'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'com.android.volley:volley:1.1.1'
+    implementation 'ch.acra:acra-dialog:5.2.0'
+    implementation 'com.github.billthefarmer:mididriver:v1.16'
+    implementation 'com.github.nikita36078:donations:2.8'
+    implementation 'com.github.nikita36078:filepicker:4.3.0'
+    implementation 'com.github.yukuku:ambilwarna:2.0.1'
+    implementation 'io.reactivex.rxjava2:rxandroid:2.1.0'
+    implementation 'io.reactivex.rxjava2:rxjava:2.2.2'
+    implementation 'org.ow2.asm:asm:7.0'
+    implementation project(':dexlib')
+    androidTestImplementation 'androidx.test:runner:1.1.1'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.0'
+}
